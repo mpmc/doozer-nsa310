@@ -1,0 +1,52 @@
+{
+    "artifacts": [
+        "linux*.deb",
+        "arch/arm/boot/zImage",
+    ],
+    "targets": {
+        "nsa310-v5.1": {
+            "environment": {
+                "KERNEL_GIT_SRC_URL": "https://github.com/torvalds/linux.git",
+                "KERNEL_GIT_BRANCH": "v5.1",
+                "GIT_CURL_VERBOSE":"1",
+                "DEB_HOST_ARCH": "armel",
+                "CROSS_COMPILE": "/usr/bin/arm-linux-gnueabi-",
+                "ARCH":"arm",
+            },
+            "buildenv": "stretch-amd64",
+            "builddeps": [
+                "lsb-release",
+                "wget",
+                "coreutils",
+                "apt-src",
+                "sudo",
+                "python3",
+                "python3-apt",
+                "ca-certificates",
+                "build-essential",
+                "debhelper",
+                "git",
+                "gcc-arm-linux-gnueabi",
+                "libc6-dev-armel-cross",
+                "bison",
+                "flex",
+                "automake",
+                "openssl",
+            ],
+            "buildcmd": [
+            	"sudo apt install --reinstall ca-certificates",
+            	"sudo update-ca-certificates",
+            	"sudo chmod 755 /etc/ssl/certs/ca-certificates.crt",
+            	"sudo rm -rf linux-${KERNEL_GIT_BRANCH} || true",
+            	"git clone -b ${KERNEL_GIT_BRANCH} ${KERNEL_GIT_SRC_URL} linux-${KERNEL_GIT_BRANCH}",
+            	"cd linux-${KERNEL_GIT_BRANCH}",
+            	"patch -p1 < ../bodhi.patch",
+            	"cp ../nsa310.config .config",
+            	"make deb-pkg",
+            	"mv ../*.deb /project/repo/checkout",
+                "mv arch/arm/boot/zImage /project/repo/checkout",
+            ]
+        },
+    },
+}
+
